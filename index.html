@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الأكواد</title>
+  <style>
+    :root {
+      --bg: #0b1020; --card: #121a33; --stroke: rgba(255,255,255,.1);
+      --text: #e9edf7; --muted: #93a0bd; --accent: #6c8cff; --accent2: #22d3ee;
+      --code-bg: #060a16;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .bg { position: fixed; inset: 0; z-index: -1; background:
+      radial-gradient(650px 420px at 88% -8%, rgba(108,140,255,.3), transparent 62%),
+      radial-gradient(750px 520px at 4% 6%, rgba(34,211,238,.16), transparent 60%), var(--bg); }
+    .screen { display: none; min-height: 100vh; }
+    .screen.active { display: block; }
+    .gate { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .gate-card { width: min(92vw, 380px); padding: 32px 28px; background: rgba(18,26,51,.78); border: 1px solid var(--stroke); border-radius: 22px; text-align: center; backdrop-filter: blur(14px); box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+    .gate-card h1 { margin: 0 0 8px; font-size: 26px; }
+    .gate-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+    input[type=password], input[type=search] { width: 100%; padding: 14px 16px; font: inherit; color: var(--text); background: var(--code-bg); border: 1px solid var(--stroke); border-radius: 12px; outline: none; }
+    input[type=password] { font-size: 18px; text-align: center; letter-spacing: .18em; }
+    input[type=search] { font-size: 15px; }
+    input:focus { border-color: rgba(108,140,255,.6); box-shadow: 0 0 0 4px rgba(108,140,255,.15); }
+    .btn { margin-top: 14px; width: 100%; padding: 13px 18px; font: inherit; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--accent), #4f6ef2); border: 0; border-radius: 12px; cursor: pointer; }
+    .btn:hover { filter: brightness(1.08); }
+    .err { min-height: 20px; margin: 12px 0 0; color: #ff6b81; font-size: 13px; font-weight: 600; }
+    .top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 18px; background: rgba(11,16,32,.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--stroke); }
+    .top h2 { margin: 0; font-size: 18px; }
+    .btn-sm { padding: 8px 14px; font: inherit; font-size: 13px; font-weight: 700; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--stroke); border-radius: 10px; cursor: pointer; }
+    .btn-sm:hover { background: rgba(255,255,255,.1); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+    .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .toc a { display: inline-block; padding: 8px 12px; font-size: 13px; color: var(--text); text-decoration: none; background: rgba(255,255,255,.05); border: 1px solid var(--stroke); border-radius: 999px; }
+    .toc a:hover { background: rgba(108,140,255,.14); border-color: rgba(108,140,255,.45); }
+    .toc a .n { color: var(--accent2); font-weight: 700; margin-inline-end: 4px; }
+    .problem { margin-bottom: 16px; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)); border: 1px solid var(--stroke); border-radius: 16px; overflow: hidden; scroll-margin-top: 80px; }
+    .problem h3 { margin: 0; padding: 14px 16px; font-size: 16px; border-bottom: 1px solid var(--stroke); background: rgba(108,140,255,.08); }
+    .problem h3 .num { color: var(--accent2); margin-inline-end: 6px; }
+    pre { margin: 0; padding: 16px; overflow: auto; background: var(--code-bg); direction: ltr; text-align: left; }
+    code { font-family: ui-monospace, "Cascadia Mono", Consolas, "Liberation Mono", monospace; font-size: 13.5px; line-height: 1.65; color: #d7def0; white-space: pre; }
+    .count { color: var(--muted); font-size: 13px; margin-top: 2px; }
+    @media (max-width: 600px) { .top h2 { font-size: 16px; } pre { padding: 12px; } code { font-size: 12.5px; } }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <section id="gate" class="screen active">
+    <div class="gate">
+      <div class="gate-card">
+        <h1>الدخول للأكواد</h1>
+        <p>اكتب الكود للدخول لصفحة الحلول</p>
+        <form id="gate-form" autocomplete="off">
+          <input id="code" type="password" inputmode="numeric" placeholder="الكود" aria-label="الكود" autofocus>
+          <button class="btn" type="submit">دخول</button>
+          <p class="err" id="err" role="alert"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="codes" class="screen">
+    <header class="top">
+      <div>
+        <h2>حلول المسائل (C++)</h2>
+        <div class="count" id="count"></div>
+      </div>
+      <button class="btn-sm" id="back" type="button">خروج</button>
+    </header>
+    <div class="wrap">
+      <nav class="toc" id="toc" aria-label="فهرس المسائل"></nav>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <script src="codes-data.js"></script>
+  <script>
+    (function () {
+      var PASS = '123';
+      var md = window.MD_DATA || '';
+      if (md && typeof md === 'object') md = md.value || md.Value || md.content || '';
+      var gate = document.getElementById('gate');
+      var codes = document.getElementById('codes');
+      var form = document.getElementById('gate-form');
+      var codeInput = document.getElementById('code');
+      var err = document.getElementById('err');
+      var list = document.getElementById('list');
+      var toc = document.getElementById('toc');
+      var count = document.getElementById('count');
+
+      function parse(mdText) {
+        var items = [];
+        var re = /^###\s+(.+?)\s*$/gm;
+        var m;
+        var positions = [];
+        while ((m = re.exec(mdText)) !== null) positions.push({ title: m[1], after: re.lastIndex });
+        for (var i = 0; i < positions.length; i++) {
+          var start = positions[i].after;
+          var end = i + 1 < positions.length ? mdText.indexOf('\n### ', start) : mdText.length;
+          if (end === -1) end = mdText.length;
+          var block = mdText.slice(start, end);
+          var codeMatch = block.match(/```(?:cpp|c\+\+)?\s*\r?\n([\s\S]*?)```/);
+          items.push({ title: positions[i].title, code: codeMatch ? codeMatch[1].replace(/\s+$/, '') : '' });
+        }
+        return items;
+      }
+
+      var items = parse(md);
+
+      function esc(s) {
+        return String(s).replace(/[&<>\"]/g, function (ch) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch];
+        });
+      }
+
+      function render() {
+        list.innerHTML = '';
+        toc.innerHTML = '';
+        items.forEach(function (it, idx) {
+          var id = 'p' + (idx + 1);
+          var m = it.title.match(/^(\d+)\.\s*(.*)$/);
+          var a = document.createElement('a');
+          a.href = '#' + id;
+          if (m) a.innerHTML = '<span class="n">' + esc(m[1]) + '</span>' + esc(m[2]);
+          else a.textContent = it.title;
+          toc.appendChild(a);
+
+          var sec = document.createElement('section');
+          sec.className = 'problem';
+          sec.id = id;
+          var h = document.createElement('h3');
+          var m2 = it.title.match(/^(\d+\.\s*)(.*)$/);
+          if (m2) h.innerHTML = '<span class="num">' + esc(m2[1]) + '</span>' + esc(m2[2]);
+          else h.textContent = it.title;
+          var pre = document.createElement('pre');
+          var c = document.createElement('code');
+          c.textContent = it.code;
+          pre.appendChild(c);
+          sec.appendChild(h);
+          sec.appendChild(pre);
+          list.appendChild(sec);
+        });
+        count.textContent = 'كل الأكواد قدامك — العدد: ' + items.length + ' مسألة';
+      }
+
+      function showCodes() {
+        gate.classList.remove('active');
+        codes.classList.add('active');
+        render();
+        window.scrollTo(0, 0);
+      }
+      function showGate() {
+        codes.classList.remove('active');
+        gate.classList.add('active');
+        codeInput.value = '';
+        err.textContent = '';
+        codeInput.focus();
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (codeInput.value.trim() === PASS) showCodes();
+        else { err.textContent = 'الكود غلط، جرّب تاني.'; codeInput.select(); }
+      });
+      document.getElementById('back').addEventListener('click', showGate);
+    })();
+  </script>
+</body>
+</html>
