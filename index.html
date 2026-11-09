@@ -38,8 +38,12 @@
     .toc a:hover { background: rgba(108,140,255,.14); border-color: rgba(108,140,255,.45); }
     .toc a .n { color: var(--accent2); font-weight: 700; margin-inline-end: 4px; }
     .problem { margin-bottom: 16px; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)); border: 1px solid var(--stroke); border-radius: 16px; overflow: hidden; scroll-margin-top: 80px; }
-    .problem h3 { margin: 0; padding: 14px 16px; font-size: 16px; border-bottom: 1px solid var(--stroke); background: rgba(108,140,255,.08); }
-    .problem h3 .num { color: var(--accent2); margin-inline-end: 6px; }
+    .problem-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--stroke); background: rgba(108,140,255,.08); }
+    .problem-head h3 { margin: 0; font-size: 16px; min-width: 0; }
+    .problem-head h3 .num { color: var(--accent2); margin-inline-end: 6px; }
+    .copy-btn { flex: 0 0 auto; padding: 7px 12px; font: inherit; font-size: 12.5px; font-weight: 700; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--stroke); border-radius: 10px; cursor: pointer; white-space: nowrap; }
+    .copy-btn:hover { background: rgba(255,255,255,.12); border-color: rgba(108,140,255,.45); }
+    .copy-btn.ok { color: #34d399; border-color: rgba(52,211,153,.45); background: rgba(52,211,153,.1); }
     pre { margin: 0; padding: 16px; overflow: auto; background: var(--code-bg); direction: ltr; text-align: left; }
     code { font-family: ui-monospace, "Cascadia Mono", Consolas, "Liberation Mono", monospace; font-size: 13.5px; line-height: 1.65; color: #d7def0; white-space: pre; }
     .count { color: var(--muted); font-size: 13px; margin-top: 2px; }
@@ -117,6 +121,35 @@
         });
       }
 
+      function copyCode(text, btn) {
+        function done(ok) {
+          var old = btn.textContent;
+          btn.textContent = ok ? 'تم النسخ ✓' : 'فشل النسخ';
+          btn.classList.toggle('ok', ok);
+          setTimeout(function () { btn.textContent = old; btn.classList.remove('ok'); }, 1600);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { done(true); }, function () { fallbackCopy(text, done); });
+        } else {
+          fallbackCopy(text, done);
+        }
+      }
+
+      function fallbackCopy(text, done) {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          var ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          done(ok);
+        } catch (e) { done(false); }
+      }
+
       function render() {
         list.innerHTML = '';
         toc.innerHTML = '';
@@ -132,15 +165,26 @@
           var sec = document.createElement('section');
           sec.className = 'problem';
           sec.id = id;
+
+          var head = document.createElement('div');
+          head.className = 'problem-head';
           var h = document.createElement('h3');
           var m2 = it.title.match(/^(\d+\.\s*)(.*)$/);
           if (m2) h.innerHTML = '<span class="num">' + esc(m2[1]) + '</span>' + esc(m2[2]);
           else h.textContent = it.title;
+          var copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className = 'copy-btn';
+          copyBtn.textContent = 'نسخ الكود';
+          copyBtn.addEventListener('click', function () { copyCode(it.code, copyBtn); });
+          head.appendChild(h);
+          head.appendChild(copyBtn);
+
           var pre = document.createElement('pre');
           var c = document.createElement('code');
           c.textContent = it.code;
           pre.appendChild(c);
-          sec.appendChild(h);
+          sec.appendChild(head);
           sec.appendChild(pre);
           list.appendChild(sec);
         });
